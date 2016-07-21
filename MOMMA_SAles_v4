@@ -1,0 +1,79 @@
+def main():
+    import calendar
+    from datetime import date
+    import pickle
+    from collections import OrderedDict
+    """
+
+    this method opens a text file, and looks for specific names and creates
+    a dictionary.
+    
+    """
+    def salesData(month, year):
+        try:
+            file = "MOMMA_Sales_"+month+"_"+str(year)+".txt"
+            a = open(file, mode='r')
+        except:
+            return
+        flavorList = ["MomCinVanLacSmoothie1lb", "MomStrawBanLacSmoothie1lb",
+                      "MomPumSpiceLacSmoothie1lb", "MomGreenLacSmoothie1lb"]
+                      
+        flavorDict = OrderedDict()             # Creates an empty dictionary
+        salesList = a.readlines()   # Creates a list of information
+        for i in salesList:
+            key = i.split('\t')[11]         # Creates a key
+            if key not in flavorList:
+                pass
+            else:
+                #i.split('\t')[4] == 'Shipped' # checks to see if item shipped
+                if i.split('\t')[4] == 'Shipped' and key not in flavorDict:    # Checks to see if key in the dictionary
+                    flavorDict[key] = int(i.split('\t')[14]) # Adds key and value to flavorDict
+                else:
+                    flavorDict[key] += int(i.split('\t')[14]) # Adds value to preexisting key
+        
+        return flavorDict
+        a.close()
+
+
+    """
+
+    This method creates one dictionary that uses a tuple for the key of a year and month
+
+    """
+    def monthlySales():
+        currentYear = date.today().year # Gets the current year
+        year = 2015 # Sets the year that the company started
+        monthlyFlavorsDict = OrderedDict()
+        while (year <= currentYear): 
+            for i in range (1, 13):
+                month = calendar.month_abbr[i] # Creates the abbreviation for each month
+                flavorDict = salesData(month, year) # Calles the salesData Method
+                if flavorDict == None:
+                    pass
+                else:
+                    key = (month, year)
+                    monthlyFlavorsDict[key] = flavorDict.items()
+            year += 1
+        
+        return monthlyFlavorsDict
+
+    """
+
+    This method takes the above dictionary and converts it to one dictionary,
+    also a file is created for use later.
+
+    """    
+    def monthlySalesFile():
+        salesFile = open('mommaSales.dat', 'wb')
+        salesDict = OrderedDict()
+        monthlySalesDict = monthlySales()
+        for key in monthlySalesDict:
+            key = key
+            salesDict[key] = dict(monthlySalesDict[key])
+        pickle.dump(salesDict, salesFile)
+        salesFile.close()
+        
+
+    monthlySalesFile()
+main()
+
